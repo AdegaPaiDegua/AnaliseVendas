@@ -1,0 +1,2323 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SalesVision | Análise de Vendas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #4338ca;
+            --secondary: #f43f5e;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray-light: #e2e8f0;
+            --gray: #94a3b8;
+            --gray-dark: #64748b;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            color: var(--dark);
+            line-height: 1.5;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            background: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+        }
+        
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background-color: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.25rem;
+            background: linear-gradient(to right, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            flex-grow: 1;
+        }
+        
+        .nav-item {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--dark);
+            text-decoration: none;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        
+        .nav-item:hover {
+            background-color: var(--gray-light);
+            color: var(--primary);
+        }
+        
+        .nav-item.active {
+            background-color: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+        }
+        
+        .nav-item .material-icons {
+            font-size: 1.25rem;
+        }
+        
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid var(--gray-light);
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        
+        .user-profile:hover {
+            background-color: var(--gray-light);
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        
+        .user-info {
+            font-size: 0.875rem;
+        }
+        
+        .user-name {
+            font-weight: 600;
+        }
+        
+        .user-role {
+            color: var(--gray-dark);
+            font-size: 0.75rem;
+        }
+        
+        .main-content {
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 8px;
+            border: none;
+            font-family: inherit;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .btn .material-icons {
+            font-size: 1.1rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--gray-light);
+            color: var(--dark);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--gray-light);
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--gray-light);
+        }
+        
+        .metric-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background-color: var(--primary);
+        }
+        
+        .metric-card.success::after {
+            background-color: var(--success);
+        }
+        
+        .metric-card.warning::after {
+            background-color: var(--warning);
+        }
+        
+        .metric-card.danger::after {
+            background-color: var(--danger);
+        }
+        
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .metric-title {
+            font-size: 0.875rem;
+            color: var(--gray-dark);
+            font-weight: 500;
+        }
+        
+        .metric-icon {
+            color: var(--gray);
+            font-size: 1.25rem;
+        }
+        
+        .metric-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        
+        .metric-change {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .metric-change.positive {
+            color: var(--success);
+        }
+        
+        .metric-change.negative {
+            color: var(--danger);
+        }
+        
+        .trend-icon {
+            font-size: 1rem;
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--gray-light);
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .chart-title {
+            font-weight: 600;
+            font-size: 1.125rem;
+        }
+        
+        .chart-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+        
+        .secondary-charts {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+        
+        .data-form {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-top: 1.5rem;
+            border: 1px solid var(--gray-light);
+        }
+        
+        .form-title {
+            font-weight: 600;
+            font-size: 1.125rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .form-title .material-icons {
+            color: var(--primary);
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .form-label {
+            font-size: 0.875rem;
+            color: var(--gray-dark);
+            font-weight: 500;
+        }
+        
+        .form-control {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray-light);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .week-selector {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .week-selector label {
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+        
+        .week-selector select {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: 1px solid var(--gray-light);
+            font-family: inherit;
+            font-size: 0.875rem;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--success);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .toast .material-icons {
+            font-size: 1.25rem;
+        }
+        
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .toast.error {
+            background-color: var(--danger);
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .data-table {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-top: 1.5rem;
+            border: 1px solid var(--gray-light);
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-light);
+        }
+        
+        th {
+            font-weight: 600;
+            color: var(--gray-dark);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        td {
+            font-size: 0.875rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--gray);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .empty-state .material-icons {
+            font-size: 3rem;
+            color: var(--gray-light);
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .badge-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        
+        .badge-warning {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+        
+        .badge-danger {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+        
+        .modal.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+        
+        .modal.show .modal-content {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--gray);
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 1200px) {
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .charts-grid, .secondary-charts {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: static;
+                height: auto;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">
+                    <span class="material-icons">analytics</span>
+                </div>
+                <span class="logo-text">SalesVision</span>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-tab="dashboard">
+                    <span class="material-icons">dashboard</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="sales">
+                    <span class="material-icons">receipt</span>
+                    <span>Vendas</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="reports">
+                    <span class="material-icons">assessment</span>
+                    <span>Relatórios</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="products">
+                    <span class="material-icons">shopping_bag</span>
+                    <span>Produtos</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="customers">
+                    <span class="material-icons">people</span>
+                    <span>Clientes</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="settings">
+                    <span class="material-icons">settings</span>
+                    <span>Configurações</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">AD</div>
+                    <div class="user-info">
+                        <div class="user-name">Admin User</div>
+                        <div class="user-role">Administrador</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            <div class="header">
+                <h1 class="page-title">Dashboard de Vendas</h1>
+                <div class="header-actions">
+                    <button class="btn btn-outline">
+                        <span class="material-icons">download</span>
+                        Exportar
+                    </button>
+                    <button class="btn btn-primary" id="addWeekBtn">
+                        <span class="material-icons">add</span>
+                        Nova Semana
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-content active">
+                <div class="week-selector">
+                    <label for="weekSelect">Selecione a semana:</label>
+                    <select id="weekSelect" class="form-control">
+                        <!-- Opções serão preenchidas via JavaScript -->
+                    </select>
+                </div>
+                
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-title">Total de Vendas</span>
+                            <span class="metric-icon material-icons">payments</span>
+                        </div>
+                        <div id="totalSales" class="metric-value">R$ 0,00</div>
+                        <div id="salesChange" class="metric-change positive">
+                            <span>+0% vs semana anterior</span>
+                            <span class="trend-icon material-icons">trending_up</span>
+                        </div>
+                    </div>
+                    <div class="metric-card success">
+                        <div class="metric-header">
+                            <span class="metric-title">Quantidade</span>
+                            <span class="metric-icon material-icons">tag</span>
+                        </div>
+                        <div id="salesCount" class="metric-value">0</div>
+                        <div id="countChange" class="metric-change positive">
+                            <span>+0% vs semana anterior</span>
+                            <span class="trend-icon material-icons">trending_up</span>
+                        </div>
+                    </div>
+                    <div class="metric-card warning">
+                        <div class="metric-header">
+                            <span class="metric-title">Ticket Médio</span>
+                            <span class="metric-icon material-icons">receipt_long</span>
+                        </div>
+                        <div id="avgTicket" class="metric-value">R$ 0,00</div>
+                        <div id="ticketChange" class="metric-change positive">
+                            <span>+0% vs semana anterior</span>
+                            <span class="trend-icon material-icons">trending_up</span>
+                        </div>
+                    </div>
+                    <div class="metric-card danger">
+                        <div class="metric-header">
+                            <span class="metric-title">Novos Clientes</span>
+                            <span class="metric-icon material-icons">person_add</span>
+                        </div>
+                        <div id="newCustomers" class="metric-value">0</div>
+                        <div id="customersChange" class="metric-change negative">
+                            <span>+0% vs semana anterior</span>
+                            <span class="trend-icon material-icons">trending_down</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h2 class="chart-title">Desempenho Semanal</h2>
+                            <div class="chart-actions">
+                                <select id="weeksRange" class="form-control" style="width: 120px;">
+                                    <option value="4">4 semanas</option>
+                                    <option value="8">8 semanas</option>
+                                    <option value="12">12 semanas</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="salesTrendChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h2 class="chart-title">Meta Semanal</h2>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="goalChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="secondary-charts">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h2 class="chart-title">Categorias</h2>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h2 class="chart-title">Métodos de Pagamento</h2>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="paymentChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h2 class="chart-title">Dias da Semana</h2>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="weekdayChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sales Tab -->
+            <div id="sales" class="tab-content">
+                <h2 class="page-title">Histórico de Vendas</h2>
+                
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Semana</th>
+                                <th>Valor Total</th>
+                                <th>Quantidade</th>
+                                <th>Ticket Médio</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salesTableBody">
+                            <!-- Dados serão preenchidos via JavaScript -->
+                        </tbody>
+                    </table>
+                    <div id="emptySales" class="empty-state">
+                        <span class="material-icons">inventory_2</span>
+                        <h3>Nenhuma semana registrada</h3>
+                        <p>Adicione dados de vendas para começar a análise</p>
+                        <button class="btn btn-primary" id="addWeekFromSales">
+                            <span class="material-icons">add</span>
+                            Adicionar Semana
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Tab -->
+            <div id="reports" class="tab-content">
+                <h2 class="page-title">Relatórios Analíticos</h2>
+                
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h2 class="chart-title">Performance Mensal</h2>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="monthlyChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h2 class="chart-title">Comparativo Anual</h2>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="yearlyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mês</th>
+                                <th>Vendas Totais</th>
+                                <th>Crescimento</th>
+                                <th>Melhor Semana</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportsTableBody">
+                            <!-- Dados serão preenchidos via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Products Tab -->
+            <div id="products" class="tab-content">
+                <h2 class="page-title">Análise por Produto</h2>
+                
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h2 class="chart-title">Produtos Mais Vendidos</h2>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="productsChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h2 class="chart-title">Categorias</h2>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="productsCategoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Produto</th>
+                                <th>Vendas</th>
+                                <th>Receita</th>
+                                <th>Margem</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTableBody">
+                            <!-- Dados serão preenchidos via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Customers Tab -->
+            <div id="customers" class="tab-content">
+                <h2 class="page-title">Dados de Clientes</h2>
+                
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-title">Clientes Totais</span>
+                            <span class="metric-icon material-icons">people</span>
+                        </div>
+                        <div id="totalCustomers" class="metric-value">1,245</div>
+                        <div class="metric-change positive">
+                            <span>+12% vs mês anterior</span>
+                            <span class="trend-icon material-icons">trending_up</span>
+                        </div>
+                    </div>
+                    <div class="metric-card success">
+                        <div class="metric-header">
+                            <span class="metric-title">Novos Clientes</span>
+                            <span class="metric-icon material-icons">person_add</span>
+                        </div>
+                        <div id="newCustomersTotal" class="metric-value">142</div>
+                        <div class="metric-change positive">
+                            <span>+8% vs mês anterior</span>
+                            <span class="trend-icon material-icons">trending_up</span>
+                        </div>
+                    </div>
+                    <div class="metric-card warning">
+                        <div class="metric-header">
+                            <span class="metric-title">Taxa de Retenção</span>
+                            <span class="metric-icon material-icons">repeat</span>
+                        </div>
+                        <div id="retentionRate" class="metric-value">78%</div>
+                        <div class="metric-change negative">
+                            <span>-2% vs mês anterior</span>
+                            <span class="trend-icon material-icons">trending_down</span>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-title">Valor Médio</span>
+                            <span class="metric-icon material-icons">monetization_on</span>
+                        </div>
+                        <div id="avgCustomerValue" class="metric-value">R$ 245</div>
+                        <div class="metric-change positive">
+                            <span>+5% vs mês anterior</span>
+                            <span class="trend-icon material-icons">trending_up</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-card" style="margin-top: 1.5rem;">
+                    <div class="chart-header">
+                        <h2 class="chart-title">Novos Clientes por Semana</h2>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="customersChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settings" class="tab-content">
+                <h2 class="page-title">Configurações do Sistema</h2>
+                
+                <div class="chart-card">
+                    <div class="form-title">
+                        <span class="material-icons">backup</span>
+                        <span>Backup de Dados</span>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <button class="btn btn-primary" id="exportData">
+                                <span class="material-icons">download</span>
+                                Exportar Dados
+                            </button>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-outline" id="importData">
+                                <span class="material-icons">upload</span>
+                                Importar Dados
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-card" style="margin-top: 1.5rem;">
+                    <div class="form-title">
+                        <span class="material-icons">settings</span>
+                        <span>Configurações Gerais</span>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Meta Semanal de Vendas</label>
+                            <input type="number" id="weeklyGoal" class="form-control" placeholder="Digite a meta em R$">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Notificações por Email</label>
+                            <select id="emailNotifications" class="form-control">
+                                <option value="daily">Diariamente</option>
+                                <option value="weekly" selected>Semanalmente</option>
+                                <option value="monthly">Mensalmente</option>
+                                <option value="none">Desativado</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-outline">Cancelar</button>
+                        <button class="btn btn-primary" id="saveSettings">Salvar Configurações</button>
+                    </div>
+                </div>
+                
+                <div class="chart-card danger" style="margin-top: 1.5rem; border-color: var(--danger);">
+                    <div class="form-title">
+                        <span class="material-icons">warning</span>
+                        <span>Zona de Perigo</span>
+                    </div>
+                    <p style="margin-bottom: 1rem; color: var(--gray-dark);">
+                        Estas ações são irreversíveis. Tenha certeza antes de prosseguir.
+                    </p>
+                    <div class="form-actions">
+                        <button class="btn btn-outline">Cancelar</button>
+                        <button class="btn btn-primary" id="resetData" style="background-color: var(--danger);">
+                            <span class="material-icons">delete</span>
+                            Resetar Todos os Dados
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal para adicionar semana -->
+            <div id="weekModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Adicionar Semana</h3>
+                        <button class="modal-close">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="weekForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Semana</label>
+                                    <input type="week" id="weekInput" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Valor Total (R$)</label>
+                                    <input type="number" step="0.01" id="weekValue" class="form-control" placeholder="0,00" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Quantidade de Vendas</label>
+                                    <input type="number" id="weekCount" class="form-control" placeholder="0" required>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" id="cancelWeek">Cancelar</button>
+                        <button type="button" class="btn btn-primary" id="saveWeek">Salvar Semana</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="toast" class="toast">
+                <span class="material-icons">check_circle</span>
+                Operação realizada com sucesso!
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Variáveis globais
+        let salesData = {};
+        let currentWeek = '';
+        let charts = {};
+        let weeklyGoal = 0;
+        let settings = {
+            emailNotifications: 'weekly'
+        };
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            setupEventListeners();
+            updateWeekSelector();
+            updateDashboard();
+            updateSalesTable();
+            updateReportsTable();
+            updateProductsTable();
+        });
+
+        // Carrega dados do localStorage
+        function loadData() {
+            const savedData = localStorage.getItem('salesAnalyticsData');
+            const savedGoal = localStorage.getItem('salesAnalyticsGoal');
+            const savedSettings = localStorage.getItem('salesAnalyticsSettings');
+            
+            if (savedData) {
+                salesData = JSON.parse(savedData);
+            }
+            
+            if (savedGoal) {
+                weeklyGoal = parseFloat(savedGoal);
+                document.getElementById('weeklyGoal').value = weeklyGoal;
+            }
+            
+            if (savedSettings) {
+                settings = JSON.parse(savedSettings);
+                document.getElementById('emailNotifications').value = settings.emailNotifications;
+            }
+            
+            // Se não houver semanas, cria uma semana padrão (atual)
+            if (Object.keys(salesData).length === 0) {
+                const currentDate = new Date();
+                currentWeek = getWeekId(currentDate);
+                salesData[currentWeek] = createWeekData(currentDate, 0, 0);
+                saveData();
+            } else {
+                // Encontra a semana mais recente
+                const weeks = Object.keys(salesData).sort();
+                currentWeek = weeks[weeks.length - 1];
+            }
+        }
+
+        // Cria objeto de dados da semana
+        function createWeekData(date, total, count) {
+            return {
+                name: formatWeekName(date),
+                total: total,
+                count: count,
+                startDate: date.toISOString(),
+                categories: generateRandomCategories(),
+                payments: generateRandomPayments(),
+                weekdays: generateRandomWeekdays()
+            };
+        }
+
+        // Gera dados aleatórios de categorias
+        function generateRandomCategories() {
+            const categories = ['Eletrônicos', 'Vestuário', 'Alimentos', 'Móveis', 'Outros'];
+            const data = {};
+            let total = 0;
+            
+            categories.forEach(cat => {
+                const value = Math.floor(Math.random() * 10000) + 1000;
+                data[cat] = value;
+                total += value;
+            });
+            
+            // Ajusta para o total desejado
+            if (salesData[currentWeek]) {
+                const factor = salesData[currentWeek].total / total;
+                for (let cat in data) {
+                    data[cat] = Math.round(data[cat] * factor);
+                }
+            }
+            
+            return data;
+        }
+
+        // Gera dados aleatórios de pagamentos
+        function generateRandomPayments() {
+            return {
+                'Crédito': Math.floor(Math.random() * 50) + 20,
+                'Débito': Math.floor(Math.random() * 40) + 15,
+                'PIX': Math.floor(Math.random() * 30) + 10,
+                'Dinheiro': Math.floor(Math.random() * 20) + 5
+            };
+        }
+
+        // Gera dados aleatórios de dias da semana
+        function generateRandomWeekdays() {
+            const weekdays = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+            const data = {};
+            let total = 0;
+            
+            weekdays.forEach(day => {
+                const value = Math.floor(Math.random() * 30) + 5;
+                data[day] = value;
+                total += value;
+            });
+            
+            // Ajusta para a quantidade desejada
+            if (salesData[currentWeek]) {
+                const factor = salesData[currentWeek].count / total;
+                for (let day in data) {
+                    data[day] = Math.round(data[day] * factor);
+                }
+            }
+            
+            return data;
+        }
+
+        // Salva dados no localStorage
+        function saveData() {
+            localStorage.setItem('salesAnalyticsData', JSON.stringify(salesData));
+            localStorage.setItem('salesAnalyticsGoal', weeklyGoal.toString());
+            localStorage.setItem('salesAnalyticsSettings', JSON.stringify(settings));
+        }
+
+        // Configura listeners de eventos
+        function setupEventListeners() {
+            // Botão para adicionar semana
+            document.getElementById('addWeekBtn').addEventListener('click', openWeekModal);
+            document.getElementById('addWeekFromSales').addEventListener('click', openWeekModal);
+            
+            // Seletor de semana
+            document.getElementById('weekSelect').addEventListener('change', function() {
+                currentWeek = this.value;
+                updateDashboard();
+            });
+            
+            // Seletor de range de semanas
+            document.getElementById('weeksRange').addEventListener('change', function() {
+                updateTrendChart();
+            });
+            
+            // Navegação por abas
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    switchTab(this.dataset.tab);
+                });
+            });
+            
+            // Configurações
+            document.getElementById('saveSettings').addEventListener('click', saveSettings);
+            document.getElementById('exportData').addEventListener('click', exportData);
+            document.getElementById('importData').addEventListener('click', importData);
+            document.getElementById('resetData').addEventListener('click', resetData);
+            
+            // Modal
+            document.getElementById('cancelWeek').addEventListener('click', closeWeekModal);
+            document.getElementById('saveWeek').addEventListener('click', saveWeekData);
+            document.querySelector('.modal-close').addEventListener('click', closeWeekModal);
+            
+            // Fechar modal ao clicar fora
+            document.getElementById('weekModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeWeekModal();
+                }
+            });
+        }
+
+        // Abre o modal para adicionar semana
+        function openWeekModal() {
+            const modal = document.getElementById('weekModal');
+            modal.classList.add('show');
+            document.getElementById('weekInput').value = '';
+            document.getElementById('weekValue').value = '';
+            document.getElementById('weekCount').value = '';
+        }
+
+        // Fecha o modal
+        function closeWeekModal() {
+            document.getElementById('weekModal').classList.remove('show');
+        }
+
+        // Alterna entre abas
+        function switchTab(tabId) {
+            // Atualiza navegação
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.tab === tabId) {
+                    item.classList.add('active');
+                }
+            });
+
+            // Mostra conteúdo da aba selecionada
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+                if (content.id === tabId) {
+                    content.classList.add('active');
+                }
+            });
+
+            // Atualiza título da página
+            const tabTitles = {
+                'dashboard': 'Dashboard de Vendas',
+                'sales': 'Histórico de Vendas',
+                'reports': 'Relatórios Analíticos',
+                'products': 'Análise por Produto',
+                'customers': 'Dados de Clientes',
+                'settings': 'Configurações do Sistema'
+            };
+            document.querySelector('.page-title').textContent = tabTitles[tabId];
+            
+            // Atualiza gráficos específicos da aba se necessário
+            if (tabId === 'reports') {
+                updateMonthlyChart();
+                updateYearlyChart();
+            } else if (tabId === 'products') {
+                updateProductsChart();
+                updateProductsCategoryChart();
+            } else if (tabId === 'customers') {
+                updateCustomersChart();
+            }
+        }
+
+        // Salva dados da semana
+        function saveWeekData() {
+            const weekInput = document.getElementById('weekInput');
+            const weekValue = parseFloat(document.getElementById('weekValue').value);
+            const weekCount = parseInt(document.getElementById('weekCount').value);
+            
+            if (!weekInput.value || isNaN(weekValue) || isNaN(weekCount)) {
+                showToast('Preencha todos os campos corretamente.', 'error');
+                return;
+            }
+            
+            // Extrai ano e semana do input type="week"
+            const [year, week] = weekInput.value.split('-W');
+            const weekDate = getDateOfWeek(parseInt(week), parseInt(year));
+            
+            const weekId = getWeekId(weekDate);
+            const weekName = formatWeekName(weekDate);
+            
+            // Adiciona/atualiza os dados da semana
+            salesData[weekId] = createWeekData(weekDate, weekValue, weekCount);
+            
+            currentWeek = weekId;
+            saveData();
+            updateWeekSelector();
+            updateDashboard();
+            updateSalesTable();
+            updateReportsTable();
+            
+            // Fecha o modal
+            closeWeekModal();
+            
+            showToast('Dados da semana salvos com sucesso!');
+        }
+
+        // Salva configurações
+        function saveSettings() {
+            const goalValue = parseFloat(document.getElementById('weeklyGoal').value);
+            if (!isNaN(goalValue)) {
+                weeklyGoal = goalValue;
+            }
+            
+            settings.emailNotifications = document.getElementById('emailNotifications').value;
+            
+            saveData();
+            updateDashboard(); // Para atualizar o gráfico de metas
+            showToast('Configurações salvas com sucesso!');
+        }
+
+        // Atualiza o seletor de semanas
+        function updateWeekSelector() {
+            const weekSelect = document.getElementById('weekSelect');
+            weekSelect.innerHTML = '';
+            
+            const weeks = Object.keys(salesData).sort();
+            
+            weeks.forEach(weekId => {
+                const option = document.createElement('option');
+                option.value = weekId;
+                option.textContent = salesData[weekId].name;
+                if (weekId === currentWeek) {
+                    option.selected = true;
+                }
+                weekSelect.appendChild(option);
+            });
+        }
+
+        // Atualiza todo o dashboard
+        function updateDashboard() {
+            updateMetrics();
+            updateTrendChart();
+            updateCategoryChart();
+            updateWeekdayChart();
+            updatePaymentChart();
+            updateGoalChart();
+        }
+
+        // Atualiza as métricas principais
+        function updateMetrics() {
+            if (!salesData[currentWeek]) return;
+            
+            const currentWeekData = salesData[currentWeek];
+            const currentTotal = currentWeekData.total || 0;
+            const currentCount = currentWeekData.count || 0;
+            const currentAvg = currentCount > 0 ? currentTotal / currentCount : 0;
+            
+            // Encontra a semana anterior
+            const weeks = Object.keys(salesData).sort();
+            const currentIndex = weeks.indexOf(currentWeek);
+            let prevTotal = 0;
+            let prevCount = 0;
+            let prevAvg = 0;
+            
+            if (currentIndex > 0) {
+                const prevWeekId = weeks[currentIndex - 1];
+                const prevWeekData = salesData[prevWeekId];
+                prevTotal = prevWeekData.total || 0;
+                prevCount = prevWeekData.count || 0;
+                prevAvg = prevCount > 0 ? prevTotal / prevCount : 0;
+            }
+            
+            // Calcula variações
+            const totalChange = prevTotal > 0 ? ((currentTotal - prevTotal) / prevTotal) * 100 : 0;
+            const countChange = prevCount > 0 ? ((currentCount - prevCount) / prevCount) * 100 : 0;
+            const avgChange = prevAvg > 0 ? ((currentAvg - prevAvg) / prevAvg) * 100 : 0;
+            
+            // Atualiza a UI
+            document.getElementById('totalSales').textContent = `R$ ${currentTotal.toFixed(2).replace('.', ',')}`;
+            document.getElementById('salesCount').textContent = currentCount;
+            document.getElementById('avgTicket').textContent = `R$ ${currentAvg.toFixed(2).replace('.', ',')}`;
+            
+            // Atualiza as variações
+            updateChangeIndicator('salesChange', totalChange);
+            updateChangeIndicator('countChange', countChange);
+            updateChangeIndicator('ticketChange', avgChange);
+            
+            // Clientes novos (30% da quantidade de vendas)
+            const newCustomers = Math.floor(currentCount * 0.3);
+            document.getElementById('newCustomers').textContent = newCustomers;
+            
+            // Calcula variação de clientes (simulado)
+            const prevCustomers = currentIndex > 0 ? Math.floor(salesData[weeks[currentIndex - 1]].count * 0.3) : 0;
+            const customersChange = prevCustomers > 0 ? ((newCustomers - prevCustomers) / prevCustomers) * 100 : 0;
+            updateChangeIndicator('customersChange', customersChange);
+        }
+
+        // Atualiza indicador de variação
+        function updateChangeIndicator(elementId, change) {
+            const element = document.getElementById(elementId);
+            const absChange = Math.abs(change);
+            
+            if (change > 0) {
+                element.className = 'metric-change positive';
+                element.innerHTML = `<span>+${absChange.toFixed(1)}% vs semana anterior</span> <span class="trend-icon material-icons">trending_up</span>`;
+            } else if (change < 0) {
+                element.className = 'metric-change negative';
+                element.innerHTML = `<span>-${absChange.toFixed(1)}% vs semana anterior</span> <span class="trend-icon material-icons">trending_down</span>`;
+            } else {
+                element.className = 'metric-change';
+                element.innerHTML = `<span>0% vs semana anterior</span>`;
+            }
+        }
+
+        // Atualiza gráfico de tendência
+        function updateTrendChart() {
+            const weeksRange = parseInt(document.getElementById('weeksRange').value);
+            const weeks = Object.keys(salesData).sort();
+            const displayWeeks = weeks.slice(-weeksRange);
+            
+            const weekNames = displayWeeks.map(weekId => salesData[weekId].name);
+            const totals = displayWeeks.map(weekId => salesData[weekId].total || 0);
+            const counts = displayWeeks.map(weekId => salesData[weekId].count || 0);
+            
+            if (charts.salesTrendChart) {
+                charts.salesTrendChart.data.labels = weekNames;
+                charts.salesTrendChart.data.datasets[0].data = totals;
+                charts.salesTrendChart.data.datasets[1].data = counts;
+                charts.salesTrendChart.update();
+            } else {
+                const ctx = document.getElementById('salesTrendChart').getContext('2d');
+                charts.salesTrendChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: weekNames,
+                        datasets: [
+                            {
+                                label: 'Valor Total (R$)',
+                                data: totals,
+                                borderColor: '#6366f1',
+                                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                                borderWidth: 2,
+                                tension: 0.3,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: 'Quantidade de Vendas',
+                                data: counts,
+                                borderColor: '#f43f5e',
+                                backgroundColor: 'rgba(244, 63, 94, 0.1)',
+                                borderWidth: 2,
+                                tension: 0.3,
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.datasetIndex === 0) {
+                                            label += 'R$ ' + context.raw.toFixed(2).replace('.', ',');
+                                        } else {
+                                            label += context.raw;
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                title: {
+                                    display: true,
+                                    text: 'Valor (R$)'
+                                }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                grid: {
+                                    drawOnChartArea: false,
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Quantidade'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Atualiza gráfico de categorias
+        function updateCategoryChart() {
+            if (!salesData[currentWeek] || !salesData[currentWeek].categories) return;
+            
+            const categories = Object.keys(salesData[currentWeek].categories);
+            const data = categories.map(cat => salesData[currentWeek].categories[cat]);
+            const colors = ['#6366f1', '#f43f5e', '#10b981', '#f59e0b', '#94a3b8'];
+            
+            if (charts.categoryChart) {
+                charts.categoryChart.data.labels = categories;
+                charts.categoryChart.data.datasets[0].data = data;
+                charts.categoryChart.data.datasets[0].backgroundColor = colors.slice(0, categories.length);
+                charts.categoryChart.update();
+            } else {
+                const ctx = document.getElementById('categoryChart').getContext('2d');
+                charts.categoryChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: categories,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: colors.slice(0, categories.length),
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = Math.round((value / total) * 100);
+                                        return `${label}: R$ ${value.toFixed(2)} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Atualiza gráfico de dias da semana
+        function updateWeekdayChart() {
+            if (!salesData[currentWeek] || !salesData[currentWeek].weekdays) return;
+            
+            const weekdays = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+            const data = weekdays.map(day => salesData[currentWeek].weekdays[day] || 0);
+            
+            if (charts.weekdayChart) {
+                charts.weekdayChart.data.datasets[0].data = data;
+                charts.weekdayChart.update();
+            } else {
+                const ctx = document.getElementById('weekdayChart').getContext('2d');
+                charts.weekdayChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: weekdays,
+                        datasets: [{
+                            label: 'Vendas',
+                            data: data,
+                            backgroundColor: '#6366f1',
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Quantidade'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Atualiza gráfico de métodos de pagamento
+        function updatePaymentChart() {
+            if (!salesData[currentWeek] || !salesData[currentWeek].payments) return;
+            
+            const methods = Object.keys(salesData[currentWeek].payments);
+            const data = methods.map(method => salesData[currentWeek].payments[method]);
+            const colors = ['rgba(99, 102, 241, 0.7)', 'rgba(244, 63, 94, 0.7)', 'rgba(16, 185, 129, 0.7)', 'rgba(249, 115, 22, 0.7)'];
+            
+            if (charts.paymentChart) {
+                charts.paymentChart.data.labels = methods;
+                charts.paymentChart.data.datasets[0].data = data;
+                charts.paymentChart.data.datasets[0].backgroundColor = colors.slice(0, methods.length);
+                charts.paymentChart.update();
+            } else {
+                const ctx = document.getElementById('paymentChart').getContext('2d');
+                charts.paymentChart = new Chart(ctx, {
+                    type: 'polarArea',
+                    data: {
+                        labels: methods,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: colors.slice(0, methods.length),
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Atualiza gráfico de meta vs realizado
+        function updateGoalChart() {
+            if (!salesData[currentWeek]) return;
+            
+            const currentTotal = salesData[currentWeek].total || 0;
+            const goal = weeklyGoal > 0 ? weeklyGoal : currentTotal * 1.2; // Se não houver meta, usa 20% acima do atual
+            
+            if (charts.goalChart) {
+                charts.goalChart.data.datasets[1].data = [currentTotal];
+                charts.goalChart.data.datasets[0].data = [goal];
+                charts.goalChart.update();
+            } else {
+                const ctx = document.getElementById('goalChart').getContext('2d');
+                charts.goalChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Realizado', 'Restante'],
+                        datasets: [
+                            {
+                                data: [goal, 0],
+                                backgroundColor: ['#e2e8f0', 'transparent'],
+                                borderWidth: 0
+                            },
+                            {
+                                data: [currentTotal, Math.max(0, goal - currentTotal)],
+                                backgroundColor: currentTotal >= goal 
+                                    ? ['#10b981', 'transparent'] 
+                                    : ['#f43f5e', 'transparent'],
+                                borderWidth: 0
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '75%',
+                        plugins: {
+                            legend: {
+                                display: false,
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.label}: R$ ${context.raw.toFixed(2)}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Atualiza tabela de vendas
+        function updateSalesTable() {
+            const tbody = document.getElementById('salesTableBody');
+            tbody.innerHTML = '';
+            
+            const weeks = Object.keys(salesData).sort().reverse();
+            
+            if (weeks.length === 0) {
+                document.getElementById('emptySales').style.display = 'flex';
+                return;
+            }
+            
+            document.getElementById('emptySales').style.display = 'none';
+            
+            weeks.forEach(weekId => {
+                const week = salesData[weekId];
+                const avg = week.count > 0 ? week.total / week.count : 0;
+                const goalAchieved = weeklyGoal > 0 ? week.total / weeklyGoal : 1;
+                
+                let statusBadge = '';
+                if (goalAchieved >= 1) {
+                    statusBadge = '<span class="badge badge-success">Meta atingida</span>';
+                } else if (goalAchieved >= 0.8) {
+                    statusBadge = '<span class="badge badge-warning">Próximo da meta</span>';
+                } else {
+                    statusBadge = '<span class="badge badge-danger">Abaixo da meta</span>';
+                }
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${week.name}</td>
+                    <td>R$ ${week.total.toFixed(2).replace('.', ',')}</td>
+                    <td>${week.count}</td>
+                    <td>R$ ${avg.toFixed(2).replace('.', ',')}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <button class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                            <span class="material-icons" style="font-size: 1rem;">visibility</span>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Atualiza gráfico mensal
+        function updateMonthlyChart() {
+            const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            
+            // Agrupa dados por mês
+            const monthlyData = {};
+            months.forEach((month, index) => {
+                monthlyData[index] = 0; // Inicializa cada mês com 0
+            });
+            
+            Object.keys(salesData).forEach(weekId => {
+                const week = salesData[weekId];
+                const date = new Date(week.startDate);
+                const month = date.getMonth();
+                monthlyData[month] += week.total;
+            });
+            
+            const data = months.map((_, index) => monthlyData[index]);
+            
+            if (charts.monthlyChart) {
+                charts.monthlyChart.data.datasets[0].data = data;
+                charts.monthlyChart.update();
+            } else {
+                const ctx = document.getElementById('monthlyChart').getContext('2d');
+                charts.monthlyChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: months,
+                        datasets: [{
+                            label: 'Vendas Mensais',
+                            data: data,
+                            backgroundColor: '#6366f1',
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Valor (R$)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Atualiza gráfico anual
+        function updateYearlyChart() {
+            // Agrupa dados por ano
+            const yearlyData = {};
+            const currentYear = new Date().getFullYear();
+            const years = [currentYear - 1, currentYear];
+            
+            years.forEach(year => {
+                yearlyData[year] = 0;
+            });
+            
+            Object.keys(salesData).forEach(weekId => {
+                const week = salesData[weekId];
+                const date = new Date(week.startDate);
+                const year = date.getFullYear();
+                if (year in yearlyData) {
+                    yearlyData[year] += week.total;
+                }
+            });
+            
+            const data = years.map(year => yearlyData[year]);
+            
+            if (charts.yearlyChart) {
+                charts.yearlyChart.data.datasets[0].data = data;
+                charts.yearlyChart.update();
+            } else {
+                const ctx = document.getElementById('yearlyChart').getContext('2d');
+                charts.yearlyChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: years,
+                        datasets: [{
+                            label: 'Vendas Anuais',
+                            data: data,
+                            backgroundColor: ['#94a3b8', '#6366f1'],
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Valor (R$)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Atualiza tabela de relatórios
+        function updateReportsTable() {
+            const tbody = document.getElementById('reportsTableBody');
+            tbody.innerHTML = '';
+            
+            const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            const currentYear = new Date().getFullYear();
+            
+            // Agrupa dados por mês
+            const monthlyData = {};
+            months.forEach((_, index) => {
+                monthlyData[index] = {
+                    total: 0,
+                    weeks: {},
+                    count: 0
+                };
+            });
+            
+            Object.keys(salesData).forEach(weekId => {
+                const week = salesData[weekId];
+                const date = new Date(week.startDate);
+                const month = date.getMonth();
+                const year = date.getFullYear();
+                
+                if (year === currentYear) {
+                    monthlyData[month].total += week.total;
+                    monthlyData[month].count += week.count;
+                    
+                    // Encontra a melhor semana
+                    if (!monthlyData[month].bestWeek || week.total > monthlyData[month].bestWeek.total) {
+                        monthlyData[month].bestWeek = {
+                            name: week.name,
+                            total: week.total
+                        };
+                    }
+                }
+            });
+            
+            // Calcula crescimento mês a mês
+            const growthRates = [];
+            months.forEach((_, index) => {
+                if (index > 0) {
+                    const prevMonth = monthlyData[index - 1].total;
+                    const currentMonth = monthlyData[index].total;
+                    const growth = prevMonth > 0 ? ((currentMonth - prevMonth) / prevMonth) * 100 : 0;
+                    growthRates.push(growth);
+                } else {
+                    growthRates.push(0);
+                }
+            });
+            
+            // Preenche a tabela
+            months.forEach((month, index) => {
+                const data = monthlyData[index];
+                const growth = growthRates[index];
+                
+                let growthDisplay = '';
+                if (growth > 0) {
+                    growthDisplay = `<span style="color: var(--success);">+${growth.toFixed(1)}%</span>`;
+                } else if (growth < 0) {
+                    growthDisplay = `<span style="color: var(--danger);">${growth.toFixed(1)}%</span>`;
+                } else {
+                    growthDisplay = '0%';
+                }
+                
+                const bestWeekDisplay = data.bestWeek 
+                    ? `${data.bestWeek.name} (R$ ${data.bestWeek.total.toFixed(2).replace('.', ',')})`
+                    : 'N/A';
+                
+                const status = growth >= 0 
+                    ? '<span class="badge badge-success">Crescimento</span>'
+                    : '<span class="badge badge-danger">Queda</span>';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${month} ${currentYear}</td>
+                    <td>R$ ${data.total.toFixed(2).replace('.', ',')}</td>
+                    <td>${growthDisplay}</td>
+                    <td>${bestWeekDisplay}</td>
+                    <td>${status}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Atualiza gráfico de produtos
+        function updateProductsChart() {
+            const products = [
+                { name: 'Notebook Pro', category: 'Eletrônicos' },
+                { name: 'Smartphone X', category: 'Eletrônicos' },
+                { name: 'TV 4K', category: 'Eletrônicos' },
+                { name: 'Camiseta Premium', category: 'Vestuário' },
+                { name: 'Tênis Esportivo', category: 'Vestuário' },
+                { name: 'Cesta Básica', category: 'Alimentos' },
+                { name: 'Sofá 3 Lugares', category: 'Móveis' },
+                { name: 'Mesa de Jantar', category: 'Móveis' }
+            ];
+            
+            const data = products.map(() => Math.floor(Math.random() * 100) + 20);
+            
+            if (charts.productsChart) {
+                charts.productsChart.data.labels = products.map(p => p.name);
+                charts.productsChart.data.datasets[0].data = data;
+                charts.productsChart.update();
+            } else {
+                const ctx = document.getElementById('productsChart').getContext('2d');
+                charts.productsChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: products.map(p => p.name),
+                        datasets: [{
+                            label: 'Vendas',
+                            data: data,
+                            backgroundColor: '#6366f1',
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Quantidade Vendida'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Atualiza gráfico de categorias de produtos
+        function updateProductsCategoryChart() {
+            const categories = ['Eletrônicos', 'Vestuário', 'Alimentos', 'Móveis', 'Outros'];
+            const data = categories.map(() => Math.floor(Math.random() * 5000) + 1000);
+            
+            if (charts.productsCategoryChart) {
+                charts.productsCategoryChart.data.datasets[0].data = data;
+                charts.productsCategoryChart.update();
+            } else {
+                const ctx = document.getElementById('productsCategoryChart').getContext('2d');
+                charts.productsCategoryChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: categories,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: ['#6366f1', '#f43f5e', '#10b981', '#f59e0b', '#94a3b8'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.label}: R$ ${context.raw.toFixed(2)}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Atualiza tabela de produtos
+        function updateProductsTable() {
+            const tbody = document.getElementById('productsTableBody');
+            tbody.innerHTML = '';
+            
+            const products = [
+                { name: 'Notebook Pro', category: 'Eletrônicos', price: 3500, margin: 0.3 },
+                { name: 'Smartphone X', category: 'Eletrônicos', price: 2500, margin: 0.25 },
+                { name: 'TV 4K', category: 'Eletrônicos', price: 3200, margin: 0.2 },
+                { name: 'Camiseta Premium', category: 'Vestuário', price: 120, margin: 0.4 },
+                { name: 'Tênis Esportivo', category: 'Vestuário', price: 280, margin: 0.35 },
+                { name: 'Cesta Básica', category: 'Alimentos', price: 150, margin: 0.15 },
+                { name: 'Sofá 3 Lugares', category: 'Móveis', price: 2200, margin: 0.25 },
+                { name: 'Mesa de Jantar', category: 'Móveis', price: 1800, margin: 0.3 }
+            ];
+            
+            products.forEach(product => {
+                const sales = Math.floor(Math.random() * 100) + 20;
+                const revenue = sales * product.price;
+                const profit = revenue * product.margin;
+                
+                let status = '';
+                if (sales > 80) {
+                    status = '<span class="badge badge-success">Alta demanda</span>';
+                } else if (sales > 40) {
+                    status = '<span class="badge badge-warning">Demanda média</span>';
+                } else {
+                    status = '<span class="badge badge-danger">Baixa demanda</span>';
+                }
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${product.name}</td>
+                    <td>${sales}</td>
+                    <td>R$ ${revenue.toFixed(2).replace('.', ',')}</td>
+                    <td>R$ ${profit.toFixed(2).replace('.', ',')} (${(product.margin * 100).toFixed(0)}%)</td>
+                    <td>${status}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Atualiza gráfico de clientes
+        function updateCustomersChart() {
+            const weeks = Object.keys(salesData).sort().slice(-8);
+            const weekNames = weeks.map(weekId => salesData[weekId].name);
+            const data = weeks.map(weekId => Math.floor(salesData[weekId].count * 0.3));
+            
+            if (charts.customersChart) {
+                charts.customersChart.data.labels = weekNames;
+                charts.customersChart.data.datasets[0].data = data;
+                charts.customersChart.update();
+            } else {
+                const ctx = document.getElementById('customersChart').getContext('2d');
+                charts.customersChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: weekNames,
+                        datasets: [{
+                            label: 'Novos Clientes',
+                            data: data,
+                            borderColor: '#6366f1',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Novos Clientes'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Exporta dados
+        function exportData() {
+            const dataToExport = {
+                salesData: salesData,
+                settings: settings,
+                weeklyGoal: weeklyGoal,
+                exportedAt: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(dataToExport, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportName = 'salesvision-data-'+new Date().toISOString().slice(0,10)+'.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportName);
+            linkElement.click();
+            
+            showToast('Dados exportados com sucesso!');
+        }
+
+        // Importa dados
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = event => {
+                    try {
+                        const importedData = JSON.parse(event.target.result);
+                        
+                        if (importedData.salesData) {
+                            salesData = importedData.salesData;
+                            
+                            if (importedData.weeklyGoal) {
+                                weeklyGoal = importedData.weeklyGoal;
+                                document.getElementById('weeklyGoal').value = weeklyGoal;
+                            }
+                            
+                            if (importedData.settings) {
+                                settings = importedData.settings;
+                                document.getElementById('emailNotifications').value = settings.emailNotifications;
+                            }
+                            
+                            // Encontra a semana mais recente
+                            const weeks = Object.keys(salesData).sort();
+                            currentWeek = weeks[weeks.length - 1];
+                            
+                            saveData();
+                            updateWeekSelector();
+                            updateDashboard();
+                            updateSalesTable();
+                            updateReportsTable();
+                            
+                            showToast('Dados importados com sucesso!');
+                        } else {
+                            showToast('Arquivo inválido. Verifique o formato.', 'error');
+                        }
+                    } catch (error) {
+                        showToast('Erro ao importar dados. Verifique o arquivo.', 'error');
+                    }
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        }
+
+        // Reseta dados
+        function resetData() {
+            if (confirm('Tem certeza que deseja resetar todos os dados? Esta ação não pode ser desfeita.')) {
+                localStorage.removeItem('salesAnalyticsData');
+                localStorage.removeItem('salesAnalyticsGoal');
+                localStorage.removeItem('salesAnalyticsSettings');
+                
+                // Recarrega a página
+                location.reload();
+            }
+        }
+
+        // Mostra toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.innerHTML = `
+                <span class="material-icons">${type === 'success' ? 'check_circle' : 'error'}</span>
+                ${message}
+            `;
+            
+            toast.className = type === 'success' ? 'toast show' : 'toast show error';
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Funções auxiliares
+        function getWeekId(date) {
+            const d = new Date(date);
+            d.setHours(0, 0, 0, 0);
+            // Segunda-feira como primeiro dia da semana
+            d.setDate(d.getDate() - (d.getDay() || 7) + 1);
+            return d.toISOString().split('T')[0];
+        }
+
+        function formatWeekName(date) {
+            const d = new Date(date);
+            const start = new Date(d);
+            const end = new Date(d);
+            end.setDate(start.getDate() + 6);
+            
+            const options = { day: 'numeric', month: 'short' };
+            return `${start.toLocaleDateString('pt-BR', options)} - ${end.toLocaleDateString('pt-BR', options)}`;
+        }
+
+        // Converte ano e semana em data
+        function getDateOfWeek(week, year) {
+            const date = new Date(year, 0, 1);
+            const dayOffset = date.getDay(); // 0 (Domingo) a 6 (Sábado)
+            
+            // Ajusta para a primeira segunda-feira do ano
+            if (dayOffset <= 4) {
+                date.setDate(date.getDate() - dayOffset + 1);
+            } else {
+                date.setDate(date.getDate() + 8 - dayOffset);
+            }
+            
+            // Adiciona as semanas
+            date.setDate(date.getDate() + (week - 1) * 7);
+            return date;
+        }
+    </script>
+</body>
+</html>
